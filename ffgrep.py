@@ -16,7 +16,7 @@ def main():
     # First arg is always regex, remaining args are
     # either directories or file patterns
     try:
-        regex = sys.argv[1]
+        regex = re.compile(sys.argv[1])
         dirs = [d for d in sys.argv[2:] if os.path.isdir(d)]
         fnpats = [d for d in sys.argv[2:] if not os.path.isdir(d)]
         fnpats = ['*'+f if f.startswith('.') else f for f in fnpats]
@@ -72,12 +72,12 @@ def main():
         for root, folders, files in os.walk(root):
             if '.svn' in folders:
                 folders.remove('.svn')
-            for file in files:
-                if fnpats.match(file):
-                    file = os.path.join(root, file)
-                    with open(file, encoding="utf-8") as fd:
-                        if any(re.search(regex, line) for line in fd):
-                            print(file)
+            for file_name in files:
+                if fnpats.match(file_name):
+                    file_name = os.path.join(root, file_name)
+                    with open(file_name, encoding="utf-8") as file:
+                        if any(re.search(regex, line) for line in file):
+                            print(file_name)
                             sys.stdout.flush()
 
 if __name__ == "__main__":
