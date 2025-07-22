@@ -36,50 +36,73 @@ class TestFFGrep(unittest.TestCase):
         return result.returncode, result.stdout, result.stderr
     
     def test_basic_search(self):
-        returncode, stdout, stderr = self.run_ffgrep('*.c', 'main')
+        returncode, stdout, stderr = self.run_ffgrep('main', '*.c')
         self.assertEqual(returncode, 0)
         self.assertIn('test.c', stdout)
         self.assertIn('main', stdout)
     
     def test_multiple_file_types(self):
-        returncode, stdout, stderr = self.run_ffgrep('*.py', 'main')
+        returncode, stdout, stderr = self.run_ffgrep('main', '*.py')
         self.assertEqual(returncode, 0)
         self.assertIn('hello.py', stdout)
     
     def test_case_insensitive(self):
-        returncode, stdout, stderr = self.run_ffgrep('-i', '*.py', 'MAIN')
+        returncode, stdout, stderr = self.run_ffgrep('MAIN', '*.py', '-i')
         self.assertEqual(returncode, 0)
         self.assertIn('hello.py', stdout)
     
     def test_line_numbers(self):
-        returncode, stdout, stderr = self.run_ffgrep('-l', '*.c', 'main')
+        returncode, stdout, stderr = self.run_ffgrep('main', '*.c', '-l')
         self.assertEqual(returncode, 0)
         self.assertIn(':1:', stdout)  # Line number should appear
     
     def test_filename_only(self):
-        returncode, stdout, stderr = self.run_ffgrep('-n', '*.c', 'main')
+        returncode, stdout, stderr = self.run_ffgrep('main', '*.c', '-n')
         self.assertEqual(returncode, 0)
         lines = stdout.strip().split('\n')
         self.assertTrue(any('test.c' in line and ':' not in line for line in lines))
     
     def test_no_matches(self):
-        returncode, stdout, stderr = self.run_ffgrep('*.c', 'nonexistent')
+        returncode, stdout, stderr = self.run_ffgrep('nonexistent', '*.c')
         self.assertEqual(returncode, 1)
         self.assertEqual(stdout.strip(), '')
     
     def test_no_files_match_pattern(self):
-        returncode, stdout, stderr = self.run_ffgrep('*.nonexistent', 'main')
+        returncode, stdout, stderr = self.run_ffgrep('main', '*.nonexistent')
         self.assertEqual(returncode, 1)
     
     def test_subdirectory_search(self):
-        returncode, stdout, stderr = self.run_ffgrep('*.js', 'main')
+        returncode, stdout, stderr = self.run_ffgrep('main', '*.js')
         self.assertEqual(returncode, 0)
         self.assertIn('subdir/app.js', stdout)
     
     def test_regex_pattern(self):
-        returncode, stdout, stderr = self.run_ffgrep('*.py', 'def.*main')
+        returncode, stdout, stderr = self.run_ffgrep('def.*main', '*.py')
         self.assertEqual(returncode, 0)
         self.assertIn('hello.py', stdout)
+    
+    def test_extension_shorthand(self):
+        returncode, stdout, stderr = self.run_ffgrep('main', '.c')
+        self.assertEqual(returncode, 0)
+        self.assertIn('test.c', stdout)
+    
+    def test_multiple_patterns(self):
+        returncode, stdout, stderr = self.run_ffgrep('main', '*.c', '*.py')
+        self.assertEqual(returncode, 0)
+        self.assertIn('test.c', stdout)
+        self.assertIn('hello.py', stdout)
+    
+    def test_multiple_directories(self):
+        # Create another directory with files
+        other_dir = os.path.join(self.test_dir, 'other')
+        os.makedirs(other_dir)
+        with open(os.path.join(other_dir, 'other.c'), 'w') as f:
+            f.write('int main() { return 1; }')
+        
+        returncode, stdout, stderr = self.run_ffgrep('main', '*.c', '.', 'other')
+        self.assertEqual(returncode, 0)
+        self.assertIn('test.c', stdout)
+        self.assertIn('other/other.c', stdout)
 
 if __name__ == '__main__':
     unittest.main()

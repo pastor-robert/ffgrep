@@ -27,17 +27,16 @@ ln -s $(pwd)/ffgrep.py /usr/local/bin/ffgrep
 ## Usage
 
 ```bash
-./ffgrep.py [options] <file_pattern> <search_pattern>
+./ffgrep.py [options] <regex> <targets...>
 ```
 
 ### Arguments
 
-- `file_pattern`: File pattern to search (e.g., "*.c", "*.py", "*.txt")
-- `search_pattern`: Regular expression pattern to search for within files
+- `regex`: Regular expression pattern to search for within files
+- `targets`: File patterns (e.g., "*.c", ".py") and/or directories to search
 
 ### Options
 
-- `-d, --directory DIR`: Directory to search (default: current directory)
 - `-i, --ignore-case`: Case insensitive search
 - `-l, --line-numbers`: Show line numbers
 - `-n, --filename-only`: Show only filenames that contain matches
@@ -46,25 +45,33 @@ ln -s $(pwd)/ffgrep.py /usr/local/bin/ffgrep
 
 ```bash
 # Find 'main' function in all C files
-./ffgrep.py "*.c" main
+./ffgrep.py main "*.c"
+
+# Extension shorthand - .c expands to *.c
+./ffgrep.py CONFIG_HIGHMEM .c
 
 # Case-insensitive search for test functions in Python files
-./ffgrep.py "*.py" "def.*test" -i
+./ffgrep.py "def.*test" "*.py" -i
 
 # Show line numbers for error messages in log files
-./ffgrep.py "*.log" "error" -l
+./ffgrep.py error "*.log" -l
+
+# Search multiple file types
+./ffgrep.py error "*.log" "*.txt" -l
+
+# Search in multiple directories
+./ffgrep.py main "*.c" src/ tests/
 
 # Just show filenames containing TODO comments
-./ffgrep.py "*.py" "TODO" -n
-
-# Search in a specific directory
-./ffgrep.py -d /path/to/project "*.js" "function"
+./ffgrep.py TODO "*.py" -n
 ```
 
 ## Features
 
 - **Fast**: Uses generators to avoid loading all file paths into memory
-- **Flexible**: Supports glob patterns for file matching and regex for content search
+- **Flexible**: Supports multiple file patterns and directories in a single command
+- **Smart**: Extension shorthand (`.c` expands to `*.c`)
+- **Powerful**: Full regex support for content search
 - **Portable**: Single Python script with no external dependencies
 - **Unix-friendly**: Follows Unix conventions for exit codes and output format
 

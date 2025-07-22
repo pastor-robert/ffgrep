@@ -7,12 +7,15 @@ import re
 import sys
 from pathlib import Path
 
-def find_files(directory, pattern):
-    """Find files matching the given pattern."""
-    for root, dirs, filenames in os.walk(directory):
-        for filename in filenames:
-            if fnmatch.fnmatch(filename, pattern):
-                yield os.path.join(root, filename)
+def find_files(directories, patterns):
+    """Find files matching any of the given patterns in any of the directories."""
+    for directory in directories:
+        for root, dirs, filenames in os.walk(directory):
+            for filename in filenames:
+                for pattern in patterns:
+                    if fnmatch.fnmatch(filename, pattern):
+                        yield os.path.join(root, filename)
+                        break  # Don't yield the same file multiple times
 
 def grep_in_file(filepath, search_pattern, case_insensitive=False, line_numbers=False):
     """Search for pattern in a file and return matching lines."""
@@ -40,16 +43,16 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 Examples:
-  ffgrep -n "*.c" main              # Find main in all .c files
-  ffgrep -n "*.py" "def.*test" -i   # Case-insensitive search for test functions
-  ffgrep "*.txt" "error" -l         # Show line numbers for matches
+  ffgrep main "*.c"                 # Find main in all .c files
+  ffgrep "def.*test" "*.py" -i      # Case-insensitive search for test functions  
+  ffgrep CONFIG_HIGHMEM .c          # Search .c files (auto-expands to *.c)
+  ffgrep error "*.log" "*.txt" -l   # Search multiple file types with line numbers
+  ffgrep main "*.c" src/ tests/     # Search in multiple directories
         '''
     )
     
-    parser.add_argument('pattern', help='File pattern to search (e.g., "*.c", "*.py")')
-    parser.add_argument('search', help='Pattern to search for within files')
-    parser.add_argument('-d', '--directory', default='.', 
-                        help='Directory to search (default: current directory)')
+    parser.add_argument('regex', help='Regular expression pattern to search for within files')
+    parser.add_argument('targets', nargs='+', help='File patterns (e.g., "*.c", ".py") and/or directories to search')
     parser.add_argument('-i', '--ignore-case', action='store_true',
                         help='Case insensitive search')
     parser.add_argument('-l', '--line-numbers', action='store_true',
@@ -59,10 +62,29 @@ Examples:
     
     args = parser.parse_args()
     
+    # Separate directories from file patterns
+    directories = []
+    file_patterns = []
+    
+    for target in args.targets:
+        if os.path.isdir(target):
+            directories.append(target)
+        else:
+            # Handle extension shorthand like ".c" -> "*.c"
+            if target.startswith('.') and not target.startswith('*.'):
+                target = '*' + target
+            file_patterns.append(target)
+    
+    # Set defaults
+    if not directories:
+        directories = ['.']
+    if not file_patterns:
+        file_patterns = ['*']
+    
     found_matches = False
     
-    for filepath in find_files(args.directory, args.pattern):
-        matches = grep_in_file(filepath, args.search, args.ignore_case, args.line_numbers)
+    for filepath in find_files(directories, file_patterns):
+        matches = grep_in_file(filepath, args.regex, args.ignore_case, args.line_numbers)
         
         if matches:
             found_matches = True
