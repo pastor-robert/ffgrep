@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
+"""Setup script for ffgrep package."""
 
-from setuptools import setup, find_packages
 import os
+from setuptools import setup
 
 # Read the README file
 def read_readme():
+    """Read the README file for long description."""
     here = os.path.abspath(os.path.dirname(__file__))
     with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
         return f.read()
 
 # Read requirements if they exist
 def read_requirements():
+    """Read requirements from requirements.txt file."""
     try:
-        with open('requirements.txt') as f:
+        with open('requirements.txt', encoding='utf-8') as f:
             return [line.strip() for line in f if line.strip() and not line.startswith('#')]
     except FileNotFoundError:
         return []
@@ -27,19 +30,19 @@ setup(
     author_email='',
     url='https://github.com/pastor-robert/ffgrep',
     license='MIT',
-    
+
     # Package configuration
     py_modules=['ffgrep'],
     python_requires='>=3.6',
     install_requires=read_requirements(),
-    
+
     # Console script entry point
     entry_points={
         'console_scripts': [
             'ffgrep=ffgrep:main',
         ],
     },
-    
+
     # Package metadata
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -58,7 +61,7 @@ setup(
         'Topic :: Text Processing :: General',
         'Topic :: Utilities',
     ],
-    
+
     keywords='grep find search files regex pattern matching',
     zip_safe=False,
 )
