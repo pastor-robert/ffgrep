@@ -4,6 +4,8 @@
 import os
 from setuptools import setup
 
+from version import __version__
+
 # Read the README file
 def read_readme():
     """Read the README file for long description."""
@@ -22,7 +24,7 @@ def read_requirements():
 
 setup(
     name='ffgrep',
-    version='1.0.0',
+    version=__version__,
     description='Fast file finder and grep tool - combines find and grep functionality',
     long_description=read_readme(),
     long_description_content_type='text/markdown',

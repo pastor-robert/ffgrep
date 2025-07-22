@@ -7,6 +7,8 @@ import os
 import re
 import sys
 
+from version import __version__
+
 def find_files(directories, patterns):
     """Find files matching any of the given patterns in any of the directories."""
     for directory in directories:
@@ -113,6 +115,7 @@ Examples:
                         help='Show line numbers')
     parser.add_argument('-n', '--filename-only', action='store_true',
                         help='Show only filenames that contain matches')
+    parser.add_argument('--version', action='version', version=f'%(prog)s {__version__}')
 
     args = parser.parse_args()
     directories, file_patterns = _parse_targets(args.targets)
