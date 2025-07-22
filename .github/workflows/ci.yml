@@ -32,5 +32,5 @@ jobs:
     - name: Test basic functionality
       run: |
         echo "Testing basic ffgrep functionality"
-        ./ffgrep.py "*.py" "def" > /dev/null
+        ./ffgrep.py "def" "*.py" > /dev/null
         echo "Basic test passed"
