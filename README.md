@@ -1,5 +1,9 @@
 # ffgrep
 
+[![CI](https://github.com/pastor-robert/ffgrep/actions/workflows/ci.yml/badge.svg)](https://github.com/pastor-robert/ffgrep/actions/workflows/ci.yml)
+[![Python 3.6+](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A fast file finder and grep tool that combines the functionality of `find` and `grep` into a single command.
 
 *Developed with assistance from Claude AI by Anthropic.*
